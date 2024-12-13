@@ -1,10 +1,11 @@
 import os
+from typing import List
 
 import numpy as np
 from PIL import Image
 from PIL.Image import Image as PILImage
 
-from constants import MAX_INTENSITY, MIN_INTENSITY
+from constants import MAX_INTENSITY, MIN_INTENSITY, CORRUPTED_FILE_MSG_ERR
 
 
 class FTImage:
@@ -31,11 +32,9 @@ class FTImage:
             lines = raw_file.readlines()
 
             for line in lines:
-                raw_row = line.split(",")
-                raw_row[-1] = raw_row[-1].replace("\n", "")
-                raw_row = list(map(int, raw_row))
+                raw_row = self.__uncompress(line)
 
-                assert len(raw_row) % self.NUM_CHANNELS == 0, "Error trying to read image, corrupted file."
+                assert len(raw_row) % self.NUM_CHANNELS == 0, CORRUPTED_FILE_MSG_ERR
 
                 row = list()
                 for idx in range(0, len(raw_row), self.NUM_CHANNELS):
@@ -45,13 +44,71 @@ class FTImage:
 
         return content
 
+
+    def __uncompress(self, raw_row_str: str) -> List[int]:
+        """Uncompress raw string line expanding numbers by the associated factor."""
+        row_uncompressed = list()
+        num_chars = list()
+        factor_chars = list()
+        idx = 0
+        n = len(raw_row_str)
+
+        while idx < (n-1):
+            char = raw_row_str[idx]
+
+            if char >= "0" and char <= "9":
+                num_chars.append(char)
+            elif char == "[":
+                idx += 1
+                while raw_row_str[idx] != "]" and idx < (n-1):
+                    factor_chars.append(raw_row_str[idx])
+                    idx += 1
+
+                num = int("".join(num_chars))
+                factor = int("".join(factor_chars))
+
+                row_uncompressed += [num]*factor
+
+                num_chars = list()
+                factor_chars = list()
+            else:
+                print(f"char not supported: {char}")
+                raise Exception(CORRUPTED_FILE_MSG_ERR)
+
+            idx += 1
+
+        return row_uncompressed
+
+    def __compress(self, row: list) -> str:
+        """Given a row with the pixels, generate the compressed version of the raw row."""
+        flat_row = [ch_val for pixel in row for ch_val in pixel]
+        compressed_row = list()
+
+        n = len(flat_row)
+        reference_value = flat_row[0]
+        factor = 1
+        idx = 1
+
+        while idx < n:
+            if flat_row[idx] == reference_value:
+                factor += 1
+            else:
+                compressed_row.append(f"{reference_value}[{factor}]")
+                reference_value = flat_row[idx]
+                factor = 1
+
+            idx += 1
+
+        # consider the last value(s)
+        compressed_row.append(f"{reference_value}[{factor}]")
+
+        return "".join(compressed_row)
+
     def save(self, path: str) -> None:
         """Save image in disk using the FT format."""
-        row_to_raw = lambda row : ",".join([",".join(map(str, pixel)) for pixel in row])
-
         with open(path, "w") as f:
             for idx, row in enumerate(self.img):
-                f.write(row_to_raw(row))
+                f.write(self.__compress(row))
 
                 if idx < (len(self.img) - 1):
                     f.write("\n")
