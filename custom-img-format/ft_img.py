@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Dict, List, Tuple
 
 import numpy as np
 from PIL import Image
@@ -23,94 +23,85 @@ class FTImage:
         self.width = len(self.img[0])
 
     def __load(self, filepath: str) -> list:
-        """Load image saved with format ft from disk. The content is plain text."""
+        """Load image saved with format ft from disk. The content is UTF-8 plain text."""
         assert os.path.isfile(filepath), f"The file wasn't found at {filepath}"
 
         content = list()
+        compressed_content = dict()
+        max_height = -1
+        max_width = -1
 
         with open(filepath, mode="r") as raw_file:
             lines = raw_file.readlines()
 
             for line in lines:
-                raw_row = self.__uncompress(line)
+                pixel, positions = self.__load_raw_pixel_and_positions(line)
 
-                assert len(raw_row) % self.NUM_CHANNELS == 0, CORRUPTED_FILE_MSG_ERR
+                compressed_content[pixel] = positions
 
-                row = list()
-                for idx in range(0, len(raw_row), self.NUM_CHANNELS):
-                    row.append(raw_row[idx:idx+self.NUM_CHANNELS])
+                for (y, x) in positions:
+                    if y > max_height:
+                        max_height = y
+                    if x > max_width:
+                        max_width = x
 
-                content.append(row)
+        max_height += 1
+        max_width += 1
+
+        content = [[(0, 0, 0) for _ in range(max_width)] for _ in range(max_height)]
+
+        for pixel, positions in compressed_content.items():
+            for (y, x) in positions:
+                content[y][x] = pixel
 
         return content
 
+    def __load_raw_pixel_and_positions(self, line: str) -> Tuple[tuple, list]:
+        pixel_str, positions_str = line.split(":")
 
-    def __uncompress(self, raw_row_str: str) -> List[int]:
-        """Uncompress raw string line expanding numbers by the associated factor."""
-        row_uncompressed = list()
-        num_chars = list()
-        factor_chars = list()
-        idx = 0
-        n = len(raw_row_str)
+        pixel = tuple(map(int, pixel_str.split(",")))
 
-        while idx < (n-1):
-            char = raw_row_str[idx]
+        assert len(pixel) == self.NUM_CHANNELS, CORRUPTED_FILE_MSG_ERR
 
-            if char >= "0" and char <= "9":
-                num_chars.append(char)
-            elif char == "[":
-                idx += 1
-                while raw_row_str[idx] != "]" and idx < (n-1):
-                    factor_chars.append(raw_row_str[idx])
-                    idx += 1
+        raw_positions = list(map(int, positions_str.split(",")))
+        positions = list()
 
-                num = int("".join(num_chars))
-                factor = int("".join(factor_chars))
+        for idx in range(0, len(raw_positions), 2):
+            positions.append(tuple(raw_positions[idx:idx+2]))
 
-                row_uncompressed += [num]*factor
+        return (pixel, positions)
 
-                num_chars = list()
-                factor_chars = list()
-            else:
-                print(f"char not supported: {char}")
-                raise Exception(CORRUPTED_FILE_MSG_ERR)
+    def __compress(self) -> dict:
+        """Generate the compressed version of the image."""
+        compressed_content = dict()
 
-            idx += 1
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = tuple(self.img[y][x])
+                if pixel in compressed_content:
+                    compressed_content[pixel].append((y, x))
+                else:
+                    compressed_content[pixel] = [(y, x)]
 
-        return row_uncompressed
+        return compressed_content
 
-    def __compress(self, row: list) -> str:
-        """Given a row with the pixels, generate the compressed version of the raw row."""
-        flat_row = [ch_val for pixel in row for ch_val in pixel]
-        compressed_row = list()
+    def __to_raw_string(self, pixel: tuple, positions: list) -> str:
+        """Given the pixel and its positions, create a raw string representation."""
+        position_to_str = lambda pos : ",".join(map(str, pos)) 
+        raw_positions = [position_to_str(pos) for pos in positions]
 
-        n = len(flat_row)
-        reference_value = flat_row[0]
-        factor = 1
-        idx = 1
-
-        while idx < n:
-            if flat_row[idx] == reference_value:
-                factor += 1
-            else:
-                compressed_row.append(f"{reference_value}[{factor}]")
-                reference_value = flat_row[idx]
-                factor = 1
-
-            idx += 1
-
-        # consider the last value(s)
-        compressed_row.append(f"{reference_value}[{factor}]")
-
-        return "".join(compressed_row)
+        return ",".join(map(str, pixel)) + ":" + ",".join(raw_positions)
 
     def save(self, path: str) -> None:
         """Save image in disk using the FT format."""
-        with open(path, "w") as f:
-            for idx, row in enumerate(self.img):
-                f.write(self.__compress(row))
+        compressed_content = self.__compress()
+        num_unique_pixels = len(compressed_content)
 
-                if idx < (len(self.img) - 1):
+        with open(path, "w") as f:
+            for idx, (pixel, positions) in enumerate(compressed_content.items()):
+                f.write(self.__to_raw_string(pixel, positions))
+
+                if idx < (num_unique_pixels - 1):
                     f.write("\n")
 
     def change_bright(self, delta: int) -> None:
