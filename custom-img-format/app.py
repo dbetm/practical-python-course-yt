@@ -4,10 +4,10 @@ from ft_img import FTImage
 
 
 if __name__ == "__main__":
-    img = FTImage(filepath="sample-images/flores_compressed.ft")
+    #img = FTImage(filepath="sample-images/noche-estrellada-compressed.ft")
 
-    #pillow_img = Image.open("sample-images/flores.jpg")
-    #img = FTImage(img=pillow_img)
+    pillow_img = Image.open("sample-images/noche-estrellada.png")
+    img = FTImage(img=pillow_img)
 
     # print(img)
 
@@ -15,11 +15,10 @@ if __name__ == "__main__":
 
     # img.change_bright(100)
 
-    pillow_img = img.to_pil_image()
-
-    pillow_img.show()
+    # pillow_img = img.to_pil_image()
+    # pillow_img.show()
 
     #img.change_bright(42)
     #print("-"*32)
     #print(img)
-    # img.save("sample-images/flores_compressed.ft")
+    img.save("sample-images/noche-estrellada-compressed.ft")

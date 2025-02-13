@@ -53,8 +53,6 @@ class FTImage:
         idx = 0
         n = len(raw_row_str)
 
-        print(raw_row_str)
-
         while idx < n:
             char = raw_row_str[idx]
 
@@ -92,7 +90,6 @@ class FTImage:
 
             idx += 1
 
-        print(row_uncompressed)
         return row_uncompressed
 
     def __compress(self, row: list) -> str:
@@ -125,6 +122,8 @@ class FTImage:
         # consider the last value(s)
         if factor > 1:
             compressed_row.append(f"{reference_value}[{factor}]")
+        elif "]" in compressed_row[-1]:
+            compressed_row.append(str(reference_value))
         else:
             compressed_row.append(f",{reference_value}")
 
