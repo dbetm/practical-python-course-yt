@@ -28,12 +28,12 @@ if __name__ == "__main__":
         # new_path = path.split(".")[0] + ".ft"
         # img.save(new_path)
 
-    # img = FTImage(filepath="sample-images/simple.ft")
+    #img = FTImage(filepath="sample-images/simple.ft")
     # pillow_img = Image.open("sample-images/flores.jpg")
 
     # img = FTImage(img=pillow_img)
 
     # print(img)
 
-    #img.save("sample-images/simple-copy.ft")
+    # img.save("sample-images/flores.ft")
 

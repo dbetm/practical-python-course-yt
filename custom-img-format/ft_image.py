@@ -1,26 +1,51 @@
 import os
+from abc import ABC, abstractmethod
 
 import numpy as np
 from PIL import Image
 from PIL.Image import Image as PILImage
 
 
-class FTImage:
+class RGBFormat(ABC):
     NUM_CHANNELS = 3
     MODE = "RGB"
 
     def __init__(self, filepath: str = None, img: PILImage = None):
         if filepath:
-            self.img = self.__load(filepath) # self.img is a list of lists (matrix)
+            self.img = self._load(filepath) # self.img is a list of lists (matrix)
         elif img:
-            self.img = self.__convert(img)
+            self.img = self._convert(img)
         else:
             raise Exception("A filepath or a Pillow image must be given")
 
         self.height = len(self.img)
         self.width = len(self.img[0])
 
-    def __load(self, filepath: str) -> list:
+    def to_pil_image(self) -> PILImage:
+        np_array = np.array(self.img, dtype=np.uint8)
+        return Image.fromarray(np_array, mode=self.MODE)
+
+    def __str__(self):
+        return "\n".join(map(str, self.img))
+
+    @abstractmethod
+    def _load(self, filepath: str) -> list:
+        """Load image saved with format ft from disk. The content is plain text."""
+        pass
+
+    @abstractmethod
+    def _convert(self, img: PILImage) -> list:
+        """Convert Pillow RGB image to ft image."""
+        pass
+
+    @abstractmethod
+    def save(self, path: str) -> None:
+        """Save image in disk using the FT format."""
+        pass
+
+
+class FTImage(RGBFormat):
+    def _load(self, filepath: str) -> list:
         """Load image saved with format ft from disk. The content is plain text."""
         assert os.path.isfile(filepath), f"The file wasn't found at {filepath}"
 
@@ -44,7 +69,7 @@ class FTImage:
 
         return content
 
-    def __convert(self, img: PILImage) -> list:
+    def _convert(self, img: PILImage) -> list:
         """Convert Pillow RGB image to ft image."""
         content = list()
 
@@ -71,10 +96,3 @@ class FTImage:
 
                 if idx < (self.height - 1):
                     f.write("\n")
-
-    def to_pil_image(self) -> PILImage:
-        np_array = np.array(self.img, dtype=np.uint8)
-        return Image.fromarray(np_array, mode=self.MODE)
-
-    def __str__(self):
-        return "\n".join(map(str, self.img))
