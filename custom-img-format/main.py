@@ -1,21 +1,21 @@
 from PIL import Image
 
-from ft_image import FTImage
+from ft_image import FTImage, FTImage2
 
 
 
 if __name__ == "__main__":
     test_images_base_path = "sample-images"
     test_images_filenames = [
-        "atardecer.ft",
-        "flores.ft",
-        "luna.ft",
-        "noche-estrellada.ft",
+        "atardecer_v2.ft",
+        "flores_v2.ft",
+        "luna_v2.ft",
+        "noche-estrellada_v2.ft",
     ]
 
     for filename in test_images_filenames:
         path = f"{test_images_base_path}/{filename}"
-        img = FTImage(filepath=path)
+        img = FTImage2(filepath=path)
 
         pillow_img = img.to_pil_image()
         pillow_img.show()
@@ -23,9 +23,9 @@ if __name__ == "__main__":
         x = input("Enter to continue...")
 
         # pillow_img = Image.open(path)
-        # img = FTImage(img=pillow_img)
+        # img = FTImage2(img=pillow_img)
 
-        # new_path = path.split(".")[0] + ".ft"
+        # new_path = path.split(".")[0] + "_v2.ft"
         # img.save(new_path)
 
     #img = FTImage(filepath="sample-images/simple.ft")
@@ -36,4 +36,3 @@ if __name__ == "__main__":
     # print(img)
 
     # img.save("sample-images/flores.ft")
-
