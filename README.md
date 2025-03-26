@@ -5,8 +5,8 @@ Playlist en YouTube: https://youtube.com/playlist?list=PL1NVubt4os9IELznFbgHvgYL
 ## Proyectos
 
 
-1. [Noches estrelladas](./starry-nights/): Genere imágenes geniales de noches estrelladas usando Pillow y una distribución de probabilidad personalizada.
-2. Formato de imagen custom - PENDING
+1. [Noches estrelladas](./starry-nights/): Genera imágenes de noches estrelladas usando Pillow y una distribución de probabilidad personalizada.
+2. [Formato de imagen custom](./custom-img-format/): Crea un formato de imagen propio, se experimenta con dos algoritmos, el último con compresión (sin pérdida).
 3. Imagen a mosaico - PENDING
 4. Trazas de estrellas - PENDING
 5. Luna que habla morse - PENDING
