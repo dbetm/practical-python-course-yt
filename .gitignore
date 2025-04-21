@@ -164,6 +164,9 @@ cython_debug/
 # data
 starry-nights/images/*.jpg
 starry-nights/images/*.png
+sunset-mosaic/sunsets_*.csv
+sunset-mosaic/assets/*.jpg
+sunset-mosaic/assets/*.png
 
 # misc
 .DS_Store
