@@ -167,6 +167,11 @@ starry-nights/images/*.png
 sunset-mosaic/sunsets_*.csv
 sunset-mosaic/assets/*.jpg
 sunset-mosaic/assets/*.png
+sunset-mosaic/assets2/*.jpg
+sunset-mosaic/assets2/*.png
+sunset-mosaic/assets/*.jpg
+sunset-mosaic/frames_bubble_sort
+sunset-mosaic/*.csv
 
 # misc
 .DS_Store
