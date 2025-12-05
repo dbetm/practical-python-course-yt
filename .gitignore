@@ -168,6 +168,8 @@ sunset-mosaic/tmp/
 sunset-mosaic/outputs/*.jpg
 sunset-mosaic/outputs/*.png
 sunset-mosaic/assets/*.png
+star-trails/output/**/*.png
+star-trails/output/**/*.jpg
 
 
 # misc
