@@ -3,10 +3,11 @@ import logging
 import sys
 from typing import List, Tuple
 
+import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from images import get_base_img, max_blend_pixel
+from images import get_base_img, get_base_img_arr, max_blend_pixel, max_blend
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -61,6 +62,21 @@ class StarTrail:
         star_trails_img.save(img_output_filepath)
 
 
+    def generate_opt(self, img_output_filepath: str, blend_method: callable):
+        star_trails = get_base_img_arr(self.img_width, self.img_height)
+
+        logger.info("Generating star trails image...blending")
+        for filename in tqdm(self.filenames):
+            img_filepath = os.path.join(images_path, filename)
+            img = np.array(Image.open(img_filepath), dtype=np.uint8)
+
+            # Mezcla vectorizada (sin bucles!)
+            star_trails = blend_method(star_trails, img)
+
+        star_trails_img = Image.fromarray(star_trails)
+        star_trails_img.save(img_output_filepath)
+
+
 if __name__ == "__main__":
     images_path = (
         "/Volumes/Extreme SSD/astro/noches-estrelladas/2025/2025-agosto-19/"
@@ -69,4 +85,4 @@ if __name__ == "__main__":
 
     session = StarTrail(images_path)
 
-    session.generate(os.path.join("images", "result1.png"), blend_method=max_blend_pixel)
+    session.generate_opt(os.path.join("output", "result2.png"), blend_method=max_blend)
