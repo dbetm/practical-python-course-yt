@@ -7,7 +7,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from images import get_base_img, get_base_img_arr, max_blend_pixel, max_blend
+from images import get_base_img, get_base_img_arr, max_blend_pixel, max_blend, lighten_blend
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -62,19 +62,26 @@ class StarTrail:
         star_trails_img.save(img_output_filepath)
 
 
-    def generate_opt(self, img_output_filepath: str, blend_method: callable):
+    def generate_opt(
+        self,
+        img_output_path: str,
+        blend_method: callable,
+        additional_kargs_blend_method: dict = {},
+    ):
         star_trails = get_base_img_arr(self.img_width, self.img_height)
 
+        os.makedirs(img_output_path, exist_ok=True)
+
         logger.info("Generating star trails image...blending")
-        for filename in tqdm(self.filenames):
+        for idx, filename in enumerate(tqdm(self.filenames)):
             img_filepath = os.path.join(images_path, filename)
             img = np.array(Image.open(img_filepath), dtype=np.uint8)
 
             # Mezcla vectorizada (sin bucles!)
-            star_trails = blend_method(star_trails, img)
+            star_trails = blend_method(star_trails, img, **additional_kargs_blend_method)
 
-        star_trails_img = Image.fromarray(star_trails)
-        star_trails_img.save(img_output_filepath)
+            frame = Image.fromarray(star_trails)
+            frame.save(os.path.join(img_output_path, f"{idx+1}_frame.jpg"), format="JPEG")
 
 
 if __name__ == "__main__":
@@ -82,7 +89,13 @@ if __name__ == "__main__":
         "/Volumes/Extreme SSD/astro/noches-estrelladas/2025/2025-agosto-19/"
         "fotos-estrellas-para-star-trails-19-agosto-2025"
     )
+    output_path = os.path.join("output", "frames")
 
     session = StarTrail(images_path)
-
-    session.generate_opt(os.path.join("output", "result2.png"), blend_method=max_blend)
+    session.generate_opt(
+        output_path,
+        blend_method=lighten_blend,
+        additional_kargs_blend_method={
+            "comet_decay": 0.999999
+        }
+    )
