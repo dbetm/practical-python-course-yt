@@ -170,6 +170,7 @@ sunset-mosaic/outputs/*.png
 sunset-mosaic/assets/*.png
 star-trails/output/**/*.png
 star-trails/output/**/*.jpg
+star-trails/output/**/*.mp4
 
 
 # misc

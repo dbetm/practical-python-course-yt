@@ -14,6 +14,7 @@ from images import (
     max_blend,
     max_blend_pixel,
 )
+from video import Timelapse
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(name="app")
@@ -103,9 +104,16 @@ if __name__ == "__main__":
     )
     output_path = os.path.join("output", "frames")
 
-    session = StarTrail(images_path)
-    session.generate_opt(
-        output_path,
-        blend_method=lighten_blend,
-        additional_kargs_blend_method={"comet_decay": 0.999999},
+    # session = StarTrail(images_path)
+    # session.generate_opt(
+    #     output_path,
+    #     blend_method=lighten_blend,
+    #     additional_kargs_blend_method={"comet_decay": 0.999999},
+    # )
+
+    timelapser = Timelapse(output_path, fps=30)
+
+    output_timelapse_path = os.path.join(
+        "output", "timelapses", "star_trails_timelapse.mp4"
     )
+    timelapser.make(output_timelapse_path)
