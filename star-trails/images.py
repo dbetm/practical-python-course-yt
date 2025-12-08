@@ -15,7 +15,9 @@ def get_base_img_arr(width: int, height: int) -> NDArray:
     return np.zeros((height, width, 3), dtype=np.uint8)
 
 
-def max_blend_pixel(pixel_a: Union[list, tuple], pixel_b: Union[list, tuple]) -> Union[list, tuple]:
+def max_blend_pixel(
+    pixel_a: Union[list, tuple], pixel_b: Union[list, tuple]
+) -> Union[list, tuple]:
     """In image manipulation programs is called: Lighten."""
     return pixel_a if sum(pixel_a) > sum(pixel_b) else pixel_b
 

@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import sys
 from typing import List, Tuple
 
@@ -7,8 +7,13 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from images import get_base_img, get_base_img_arr, max_blend_pixel, max_blend, lighten_blend
-
+from images import (
+    get_base_img,
+    get_base_img_arr,
+    lighten_blend,
+    max_blend,
+    max_blend_pixel,
+)
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(name="app")
@@ -18,13 +23,17 @@ class StarTrail:
     def __init__(self, images_path: str):
         self.images_path = images_path
         self.filenames = self.__load_filenames()
-        self.filenames.sort() # keep ordered
+        self.filenames.sort()  # keep ordered
         self.img_height, self.img_width = self.__get_dims()
 
         self.__check_dims()
 
     def __load_filenames(self) -> List[str]:
-        return [filename for filename in os.listdir(images_path) if not filename.startswith(".")]
+        return [
+            filename
+            for filename in os.listdir(images_path)
+            if not filename.startswith(".")
+        ]
 
     def __get_dims(self) -> Tuple[int, int]:
         with Image.open(os.path.join(self.images_path, self.filenames[0])) as img:
@@ -61,7 +70,6 @@ class StarTrail:
 
         star_trails_img.save(img_output_filepath)
 
-
     def generate_opt(
         self,
         img_output_path: str,
@@ -78,10 +86,14 @@ class StarTrail:
             img = np.array(Image.open(img_filepath), dtype=np.uint8)
 
             # Mezcla vectorizada (sin bucles!)
-            star_trails = blend_method(star_trails, img, **additional_kargs_blend_method)
+            star_trails = blend_method(
+                star_trails, img, **additional_kargs_blend_method
+            )
 
             frame = Image.fromarray(star_trails)
-            frame.save(os.path.join(img_output_path, f"{idx+1}_frame.jpg"), format="JPEG")
+            frame.save(
+                os.path.join(img_output_path, f"{idx+1}_frame.jpg"), format="JPEG"
+            )
 
 
 if __name__ == "__main__":
@@ -95,7 +107,5 @@ if __name__ == "__main__":
     session.generate_opt(
         output_path,
         blend_method=lighten_blend,
-        additional_kargs_blend_method={
-            "comet_decay": 0.999999
-        }
+        additional_kargs_blend_method={"comet_decay": 0.999999},
     )

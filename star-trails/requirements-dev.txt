@@ -1,0 +1,2 @@
+black==25.11.0 # auto format
+isort==7.0.0 # sort imports
