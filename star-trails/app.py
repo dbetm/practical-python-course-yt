@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import sys
 from typing import List, Tuple
 
@@ -7,8 +7,7 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
-from images import get_base_img, get_base_img_arr, max_blend_pixel, max_blend
-
+from images import get_base_img, get_base_img_arr, max_blend, max_blend_pixel
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(name="app")
@@ -28,7 +27,9 @@ class StarTrail:
 
     def __load_filenames(self) -> List[str]:
         return [
-            filename for filename in os.listdir(images_path) if not filename.startswith(".")
+            filename
+            for filename in os.listdir(images_path)
+            if not filename.startswith(".")
         ]
 
     def __get_dims(self) -> Tuple[int, int]:
@@ -36,16 +37,16 @@ class StarTrail:
             return img.height, img.width
 
     def __check_dims(self) -> None:
-        logging.info("Checking size for each image...")
+        logger.info("Checking size for each image...")
 
         for filename in tqdm(self.filenames):
             img_filepath = os.path.join(self.images_path, filename)
 
             with Image.open(img_filepath) as img:
                 if img.width != self.img_width or img.height != self.img_height:
-                    return ValueError("All images must have the same size!")
+                    raise ValueError("All images must have the same size!")
 
-        logging.info("Great! All images have the same size")
+        logger.info("Great! All images have the same size")
 
     def generate(self, img_output_filepath: str, blend_fn: callable) -> None:
         star_trails_img = get_base_img(self.img_width, self.img_height)
@@ -82,7 +83,9 @@ class StarTrail:
             star_trails = blend_fn(star_trails, img, **addition_kargs_blend)
 
             star_trails_img = Image.fromarray(star_trails)
-            star_trails_img.save(os.path.join(frames_path, f"{idx+1}_frame.jpg"), format="JPEG")
+            star_trails_img.save(
+                os.path.join(frames_path, f"{idx+1}_frame.jpg"), format="JPEG"
+            )
 
 
 if __name__ == "__main__":
@@ -94,9 +97,7 @@ if __name__ == "__main__":
     session = StarTrail(images_path)
 
     session.generate_opt(
-        os.path.join("output", "frames"), 
+        os.path.join("output", "frames"),
         max_blend,
-        addition_kargs_blend={
-            "comet_decay": 0.999999
-        }
+        addition_kargs_blend={"comet_decay": 0.999999},
     )
