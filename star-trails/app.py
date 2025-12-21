@@ -8,6 +8,7 @@ from PIL import Image
 from tqdm import tqdm
 
 from images import get_base_img, get_base_img_arr, max_blend, max_blend_pixel
+from timelapse import Timelapse
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(name="app")
@@ -93,11 +94,20 @@ if __name__ == "__main__":
         "/Volumes/Extreme SSD/astro/noches-estrelladas/2025/2025-agosto-19/"
         "fotos-estrellas-para-star-trails-19-agosto-2025"
     )
+    output_path = os.path.join("output", "frames")
 
     session = StarTrail(images_path)
 
     session.generate_opt(
-        os.path.join("output", "frames"),
+        output_path,
         max_blend,
         addition_kargs_blend={"comet_decay": 0.999999},
     )
+
+    timelapser = Timelapse(output_path, fps=30)
+
+    output_timelapse_path = os.path.join(
+        "output", "timelapses", "star_trails_timelapse.mp4"
+    )
+
+    timelapser.make(output_timelapse_path)
