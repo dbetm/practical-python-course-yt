@@ -62,6 +62,7 @@ class TreeNode:
                     }
         
         self.split_point = best_split_point
+        print(self.split_point)
         self.data.sort(key=lambda x : x[self.split_point["feature"]])
 
         self.left = TreeNode(
@@ -132,6 +133,6 @@ class RegressionTree:
             else:
                 node = node.right
 
-        leaf_labels = [example[self.target_name] for example in node.example]
+        leaf_labels = [example[self.target_name] for example in node.data]
 
-        return sum(leaf_labels) / len(node.examples)
+        return sum(leaf_labels) / len(node.data)
